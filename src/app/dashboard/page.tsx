@@ -183,6 +183,8 @@ export default function DashboardPage() {
     label: string;
     amount: number;
     category: string;
+    recurrence: RecurrenceType;
+    frequency?: FrequencyType;
     notes?: string;
   }) => {
     const newEntry: BudgetEntry = {
@@ -191,7 +193,8 @@ export default function DashboardPage() {
       label: data.label,
       amount: data.amount,
       category: data.category || undefined,
-      recurrence: "one-time",
+      recurrence: data.recurrence,
+      frequency: data.recurrence === "recurring" ? data.frequency : undefined,
       notes: data.notes,
     };
 

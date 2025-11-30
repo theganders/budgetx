@@ -34,6 +34,9 @@ const CATEGORIES = [
   "Other",
 ];
 
+type RecurrenceType = "one-time" | "recurring";
+type FrequencyType = "weekly" | "monthly" | "yearly";
+
 type ReceiptUploadDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,6 +44,8 @@ type ReceiptUploadDialogProps = {
     label: string;
     amount: number;
     category: string;
+    recurrence: RecurrenceType;
+    frequency?: FrequencyType;
     notes?: string;
   }) => void;
 };
@@ -63,6 +68,8 @@ export function ReceiptUploadDialog({
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [recurrence, setRecurrence] = useState<RecurrenceType>("one-time");
+  const [frequency, setFrequency] = useState<FrequencyType>("monthly");
   const [notes, setNotes] = useState("");
 
   const resetState = useCallback(() => {
@@ -75,6 +82,8 @@ export function ReceiptUploadDialog({
     setLabel("");
     setAmount("");
     setCategory("");
+    setRecurrence("one-time");
+    setFrequency("monthly");
     setNotes("");
   }, []);
 
@@ -174,6 +183,8 @@ export function ReceiptUploadDialog({
       setLabel(data.label || "");
       setAmount(data.amount?.toString() || "");
       setCategory(data.category || "Other");
+      setRecurrence(data.recurrence || "one-time");
+      setFrequency(data.frequency || "monthly");
       setNotes(data.notes || "");
       setStep("review");
     } catch (err) {
@@ -194,11 +205,13 @@ export function ReceiptUploadDialog({
       label: label.trim(),
       amount: parsedAmount,
       category: category || "Other",
+      recurrence,
+      frequency: recurrence === "recurring" ? frequency : undefined,
       notes: notes.trim() || undefined,
     });
 
     handleOpenChange(false);
-  }, [label, amount, category, notes, onExpenseAdd, handleOpenChange]);
+  }, [label, amount, category, recurrence, frequency, notes, onExpenseAdd, handleOpenChange]);
 
   const isFormValid =
     label.trim().length > 0 &&
@@ -365,6 +378,36 @@ export function ReceiptUploadDialog({
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-ds-gray-700 text-xs">Recurrence</span>
+                <Select value={recurrence} onValueChange={(v) => setRecurrence(v as RecurrenceType)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recurrence" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one-time">One-time</SelectItem>
+                    <SelectItem value="recurring">Recurring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {recurrence === "recurring" && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-ds-gray-700 text-xs">Frequency</span>
+                  <Select value={frequency} onValueChange={(v) => setFrequency(v as FrequencyType)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">
